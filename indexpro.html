@@ -3,19 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APEX Token v2.1</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<title>APEX v2.2</title>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
 
 <style>
 
+/* ===== GLOBAL ===== */
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:'Inter',sans-serif;
+font-family:Arial, sans-serif;
 }
 
 body{
@@ -23,6 +22,7 @@ background:#0f172a;
 color:white;
 }
 
+/* ===== HEADER ===== */
 header{
 display:flex;
 justify-content:space-between;
@@ -31,20 +31,20 @@ padding:20px 40px;
 background:#111827;
 position:sticky;
 top:0;
-z-index:100;
 }
 
 nav a{
 margin:0 15px;
+color:#94a3b8;
 text-decoration:none;
-color:#cbd5e1;
-font-weight:600;
+font-weight:bold;
 }
 
 nav a:hover{
 color:white;
 }
 
+/* ===== BUTTONS ===== */
 button{
 padding:10px 18px;
 border:none;
@@ -52,16 +52,17 @@ border-radius:8px;
 background:#2563eb;
 color:white;
 cursor:pointer;
-font-weight:600;
 transition:0.3s;
+font-weight:bold;
 }
 
 button:hover{
 opacity:0.8;
 }
 
+/* ===== SECTIONS ===== */
 .section{
-padding:80px 40px;
+padding:70px 40px;
 }
 
 .hero{
@@ -70,13 +71,8 @@ background:linear-gradient(135deg,#1e293b,#0f172a);
 }
 
 .hero h1{
-font-size:48px;
+font-size:40px;
 margin-bottom:20px;
-}
-
-.hero p{
-color:#94a3b8;
-margin-bottom:30px;
 }
 
 .cards{
@@ -90,7 +86,6 @@ margin-top:40px;
 background:#1e293b;
 padding:25px;
 border-radius:12px;
-box-shadow:0 0 20px rgba(0,0,0,0.3);
 transition:0.3s;
 }
 
@@ -99,11 +94,12 @@ transform:translateY(-5px);
 }
 
 .metric{
-font-size:22px;
+font-size:20px;
 font-weight:bold;
 margin-top:10px;
 }
 
+/* ===== WALLET ===== */
 #walletBox{
 display:none;
 align-items:center;
@@ -131,23 +127,16 @@ padding:15px;
 border-radius:10px;
 }
 
-.table{
+/* ===== TABLE ===== */
+table{
 width:100%;
 margin-top:30px;
 border-collapse:collapse;
 }
 
-.table th,.table td{
+th,td{
 padding:15px;
 border-bottom:1px solid #334155;
-text-align:left;
-}
-
-.badge{
-padding:5px 10px;
-border-radius:20px;
-font-size:12px;
-font-weight:bold;
 }
 
 .footer{
@@ -155,12 +144,6 @@ text-align:center;
 padding:30px;
 background:#111827;
 color:#94a3b8;
-}
-
-@media(max-width:768px){
-.hero h1{
-font-size:32px;
-}
 }
 
 </style>
@@ -177,8 +160,7 @@ font-size:32px;
 <a href="#leaderboard">Leaderboard</a>
 </nav>
 
-<div id="walletContainer">
-
+<div>
 <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
 
 <div id="walletBox" onclick="toggleDropdown()">
@@ -193,16 +175,13 @@ font-size:32px;
 <div id="dropdown">
 <button onclick="disconnectWallet()">Disconnect</button>
 </div>
-
 </div>
 </header>
 
+<!-- HERO -->
 <section class="hero section" id="home">
 <h1>The Future of Decentralized Growth</h1>
 <p>Stake. Earn. Dominate.</p>
-
-<button>Buy APEX</button>
-<button style="background:#22c55e;">Stake Now</button>
 
 <div class="cards">
 <div class="card">
@@ -227,66 +206,64 @@ APY
 </div>
 </section>
 
+<!-- DASHBOARD -->
 <section class="section" id="dashboard">
 <h2>📊 Dashboard</h2>
 
 <div class="cards">
 <div class="card">
-Your Balance
-<div class="metric" id="apexBalance">0 APEX</div>
+Your APEX
+<div class="metric" id="apexBalance">0</div>
 </div>
 
 <div class="card">
-BNB Balance
-<div class="metric" id="bnbBalance">0 BNB</div>
+Your BNB
+<div class="metric" id="bnbBalance">0</div>
 </div>
 
 <div class="card">
-Your Level
+Level
 <div class="metric" id="userLevel">None</div>
 </div>
 </div>
 </section>
 
+<!-- STAKING -->
 <section class="section" id="staking">
 <h2>💰 Staking Pools</h2>
 
-<table class="table">
+<table>
 <tr>
 <th>Pool</th>
 <th>Lock</th>
 <th>APY</th>
-<th>Status</th>
 </tr>
 
 <tr>
 <td>Flex</td>
 <td>0 Days</td>
 <td>8%</td>
-<td><span class="badge" style="background:#22c55e;">Active</span></td>
 </tr>
 
 <tr>
 <td>Gold</td>
 <td>30 Days</td>
 <td>18%</td>
-<td><span class="badge" style="background:#facc15;color:black;">Popular</span></td>
 </tr>
 
 <tr>
 <td>Diamond</td>
 <td>90 Days</td>
 <td>35%</td>
-<td><span class="badge" style="background:#38bdf8;">High Yield</span></td>
 </tr>
-
 </table>
 </section>
 
+<!-- LEADERBOARD -->
 <section class="section" id="leaderboard">
-<h2>🏆 Top Holders</h2>
+<h2>🏆 Leaderboard</h2>
 
-<table class="table">
+<table>
 <tr>
 <th>Rank</th>
 <th>Wallet</th>
@@ -310,22 +287,23 @@ Your Level
 <td>0x21D...45Ac</td>
 <td>🥇 Gold</td>
 </tr>
-
 </table>
 </section>
 
 <div class="footer">
-APEX Token v2.1 — Built for Growth 🚀
+APEX v2.2 — Single File Build 🚀
 </div>
 
 <script>
+
+/* ===== WALLET LOGIC ===== */
 
 let provider;
 let signer;
 let userAddress;
 
 function formatAddress(address){
-return address.substring(0,6)+"..."+address.substring(address.length-4);
+return address.slice(0,6)+"..."+address.slice(-4);
 }
 
 function generateColor(address){
@@ -336,7 +314,7 @@ hash=address.charCodeAt(i)+((hash<<5)-hash);
 let color="#";
 for(let i=0;i<3;i++){
 let value=(hash>>(i*8))&255;
-color+=("00"+value.toString(16)).substr(-2);
+color+=("00"+value.toString(16)).slice(-2);
 }
 return color;
 }
@@ -356,6 +334,8 @@ document.getElementById("avatar").style.background=generateColor(userAddress);
 document.getElementById("avatar").innerText=userAddress[2].toUpperCase();
 
 loadBalances();
+}else{
+alert("Install MetaMask");
 }
 }
 
@@ -367,24 +347,24 @@ bnb=parseFloat(bnb).toFixed(4);
 document.getElementById("bnbBalance").innerText=bnb+" BNB";
 document.getElementById("walletBalance").innerText=bnb+" BNB";
 
-let randomApex=(Math.random()*150000).toFixed(0);
-document.getElementById("apexBalance").innerText=randomApex+" APEX";
+let fakeApex=Math.floor(Math.random()*150000);
+document.getElementById("apexBalance").innerText=fakeApex+" APEX";
 
 let level="None";
 
-if(randomApex>100000){
+if(fakeApex>100000){
 level="🐋 Whale";
 document.getElementById("badge").innerText="🐋";
 }
-else if(randomApex>50000){
+else if(fakeApex>50000){
 level="💎 Diamond";
 document.getElementById("badge").innerText="💎";
 }
-else if(randomApex>10000){
+else if(fakeApex>10000){
 level="🥇 Gold";
 document.getElementById("badge").innerText="🥇";
 }
-else if(randomApex>0){
+else if(fakeApex>0){
 level="🔥 Holder";
 document.getElementById("badge").innerText="🔥";
 }
