@@ -1,109 +1,187 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Token Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-  
-  <style>
-    body {
-      background: #05070d;
-      color: white;
-      font-family: Arial;
-      text-align: center;
-    }
-    
-    button {
-      padding: 12px 25px;
-      margin: 10px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #0072ff;
-      color: white;
-      font-weight: bold;
-    }
-    
-    .card {
-      background: #0c101c;
-      padding: 20px;
-      margin: 20px auto;
-      width: 300px;
-      border-radius: 10px;
-      border: 1px solid #0072ff;
-    }
-  </style>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Token</title>
 
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+background:linear-gradient(135deg,#05070d,#0f1624);
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+h1{
+margin-top:20px;
+font-size:32px;
+}
+
+button{
+padding:12px 25px;
+margin:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#0072ff;
+color:white;
+font-weight:bold;
+transition:0.3s;
+}
+
+button:hover{
+background:#00c6ff;
+}
+
+.card{
+background:#0c101c;
+padding:20px;
+margin:20px auto;
+width:350px;
+border-radius:15px;
+border:1px solid #0072ff;
+box-shadow:0 0 20px rgba(0,114,255,0.4);
+}
+
+canvas{
+margin-top:20px;
+}
+</style>
+</head>
 <body>
-  
-  <h1>⚡ APEX TOKEN</h1>
-  
-  <button onclick="connectWallet()">Connect Wallet</button>
-  <button onclick="buyToken()">Buy on PancakeSwap</button>
-  
-  <div class="card">
-    <h3>Wallet</h3>
-    <p id="wallet">Not Connected</p>
-  </div>
-  
-  <div class="card">
-    <h3>BNB Balance</h3>
-    <p id="bnbBalance">0</p>
-  </div>
-  
-  <div class="card">
-    <h3>APEX Balance</h3>
-    <p id="tokenBalance">0</p>
-  </div>
-  
-  <script>
-    let provider;
-    let signer;
-    let userAddress;
-    
-    const tokenAddress = "0xB3a78c3f55Fc653992169F77cb10878D2cF1684f";
-    
-    // ABI mínima para pegar saldo
-    const tokenABI = [
-      "function balanceOf(address owner) view returns (uint256)",
-      "function decimals() view returns (uint8)"
-    ];
-    
-    async function connectWallet() {
-      
-      if (typeof window.ethereum === 'undefined') {
-        alert("Install MetaMask");
-        return;
-      }
-      
-      await ethereum.request({ method: 'eth_requestAccounts' });
-      
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
-      
-      document.getElementById("wallet").innerText = userAddress;
-      
-      loadBalances();
-    }
-    
-    async function loadBalances() {
-      
-      // BNB Balance
-      let balance = await provider.getBalance(userAddress);
-      let bnb = ethers.utils.formatEther(balance);
-      document.getElementById("bnbBalance").innerText = parseFloat(bnb).toFixed(4);
-      
-      // Token Balance
-      const contract = new ethers.Contract(tokenAddress, tokenABI, provider);
-      
-      let decimals = await contract.decimals();
-      let tokenBal = await contract.balanceOf(userAddress);
-      
-      let formatted = tokenBal / Math.pow(10, decimals);
+
+<h1>⚡ APEX TOKEN DASHBOARD</h1>
+
+<button onclick="connectWallet()">Connect MetaMask</button>
+<button onclick="buyToken()">Buy on PancakeSwap</button>
+
+<div id="walletCard" class="card">
+<h3>Wallet</h3>
+<p id="wallet">Not Connected</p>
+</div>
+
+<div class="card">
+<h3>BNB Balance</h3>
+<p id="bnbBalance">0</p>
+</div>
+
+<div class="card">
+<h3>APEX Balance</h3>
+<p id="tokenBalance">0</p>
+</div>
+
+<div class="card">
+<h3>Total Supply</h3>
+<p id="totalSupply">0</p>
+<canvas id="supplyChart"></canvas>
+</div>
+
+<script>
+
+const tokenAddress = "SEU_CONTRATO_AQUI";
+
+const tokenABI = [
+"function balanceOf(address owner) view returns (uint256)",
+"function decimals() view returns (uint8)",
+"function totalSupply() view returns (uint256)"
+];
+
+let provider;
+let signer;
+let userAddress;
+
+function antiBotProtection(){
+
+// bloqueia bots simples
+if(navigator.webdriver){
+document.body.innerHTML = "Access Denied";
+}
+
+// bloqueia se abrir muito rápido (auto scripts)
+let start = Date.now();
+setTimeout(()=>{
+if(Date.now() - start < 50){
+document.body.innerHTML = "Bot detected";
+}
+},10);
+
+}
+
+antiBotProtection();
+
+async function connectWallet(){
+
+if(typeof window.ethereum === 'undefined'){
+alert("MetaMask not installed. Redirecting...");
+window.open("https://metamask.io/download/", "_blank");
+return;
+}
+
+await ethereum.request({method:'eth_requestAccounts'});
+
+provider = new ethers.providers.Web3Provider(window.ethereum);
+signer = provider.getSigner();
+userAddress = await signer.getAddress();
+
+document.getElementById("wallet").innerText = userAddress;
+
+loadData();
+}
+
+async function loadData(){
+
+let balance = await provider.getBalance(userAddress);
+let bnb = ethers.utils.formatEther(balance);
+document.getElementById("bnbBalance").innerText = parseFloat(bnb).toFixed(4);
+
+const contract = new ethers.Contract(tokenAddress, tokenABI, provider);
+
+let decimals = await contract.decimals();
+
+let tokenBal = await contract.balanceOf(userAddress);
+let formatted = tokenBal / Math.pow(10, decimals);
+document.getElementById("tokenBalance").innerText = formatted.toFixed(2);
+
+let supply = await contract.totalSupply();
+let total = supply / Math.pow(10, decimals);
+document.getElementById("totalSupply").innerText = total.toFixed(0);
+
+createChart(total, formatted);
+
+}
+
+function createChart(total, user){
+
+let ctx = document.getElementById("supplyChart").getContext("2d");
+
+new Chart(ctx,{
+type:'doughnut',
+data:{
+labels:["Your Tokens","Remaining Supply"],
+datasets:[{
+data:[user, total-user],
+backgroundColor:["#0072ff","#1c2333"]
+}]
+}
+});
+
+}
+
+function buyToken(){
+window.open(
+"https://pancakeswap.finance/swap?outputCurrency=SEU_CONTRATO_AQUI",
+"_blank"
+);
+}
+
+</script>
+
+</body>
+</html>
       
       document.getElementById("tokenBalance").innerText = formatted.toFixed(2);
       
