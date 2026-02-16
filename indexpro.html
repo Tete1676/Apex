@@ -10,193 +10,220 @@
 
 <style>
 body{
-background:linear-gradient(135deg,#05070d,#0f1624);
+background:#0b0f19;
 color:white;
 font-family:Arial;
-text-align:center;
+margin:0;
 }
 
-h1{
-margin-top:20px;
-font-size:32px;
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px;
+background:#111827;
 }
 
 button{
-padding:12px 25px;
-margin:10px;
+padding:10px 20px;
 border:none;
 border-radius:8px;
-cursor:pointer;
-background:#0072ff;
+background:#2563eb;
 color:white;
+cursor:pointer;
 font-weight:bold;
-transition:0.3s;
 }
 
-button:hover{
-background:#00c6ff;
+.container{
+padding:20px;
+}
+
+.stats{
+display:flex;
+flex-wrap:wrap;
+gap:20px;
 }
 
 .card{
-background:#0c101c;
+flex:1;
+min-width:200px;
+background:#1f2937;
 padding:20px;
-margin:20px auto;
-width:350px;
-border-radius:15px;
-border:1px solid #0072ff;
-box-shadow:0 0 20px rgba(0,114,255,0.4);
+border-radius:12px;
 }
 
-canvas{
-margin-top:20px;
+.staking{
+margin-top:30px;
+background:#1f2937;
+padding:20px;
+border-radius:12px;
+}
+
+input{
+padding:10px;
+width:200px;
+border-radius:6px;
+border:none;
+margin-right:10px;
 }
 </style>
 </head>
 <body>
 
-<h1>⚡ APEX TOKEN DASHBOARD</h1>
+<header>
+<h2>⚡ APEX TOKEN</h2>
+<button onclick="connectWallet()">Connect Wallet</button>
+</header>
 
-<button onclick="connectWallet()">Connect MetaMask</button>
-<button onclick="buyToken()">Buy on PancakeSwap</button>
+<div class="container">
 
-<div id="walletCard" class="card">
-<h3>Wallet</h3>
-<p id="wallet">Not Connected</p>
+<div class="stats">
+<div class="card">
+<h4>Preço</h4>
+<p id="price">$0.0000</p>
 </div>
 
 <div class="card">
-<h3>BNB Balance</h3>
-<p id="bnbBalance">0</p>
+<h4>Market Cap</h4>
+<p id="marketcap">$0</p>
 </div>
 
 <div class="card">
-<h3>APEX Balance</h3>
-<p id="tokenBalance">0</p>
+<h4>Total Supply</h4>
+<p id="supply">0</p>
 </div>
 
 <div class="card">
-<h3>Total Supply</h3>
-<p id="totalSupply">0</p>
-<canvas id="supplyChart"></canvas>
+<h4>Seu Saldo</h4>
+<p id="balance">0</p>
+</div>
+</div>
+
+<canvas id="chart" height="100"></canvas>
+
+<div class="staking">
+<h3>🔥 Staking</h3>
+<p>APR: 20%</p>
+
+<input type="number" id="stakeAmount" placeholder="Quantidade APEX">
+<button onclick="stake()">Stake</button>
+<button onclick="unstake()">Unstake</button>
+
+<p>Staked: <span id="staked">0</span></p>
+<p>Recompensa: <span id="reward">0</span></p>
+</div>
+
 </div>
 
 <script>
 
-const tokenAddress = "SEU_CONTRATO_AQUI";
+const tokenAddress = "SEU_CONTRATO_TOKEN";
+const stakingAddress = "SEU_CONTRATO_STAKING";
 
 const tokenABI = [
 "function balanceOf(address owner) view returns (uint256)",
 "function decimals() view returns (uint8)",
-"function totalSupply() view returns (uint256)"
+"function totalSupply() view returns (uint256)",
+"function approve(address spender, uint256 amount) returns (bool)"
+];
+
+const stakingABI = [
+"function stake(uint256 amount)",
+"function withdraw(uint256 amount)",
+"function earned(address account) view returns(uint256)",
+"function balanceOf(address account) view returns(uint256)"
 ];
 
 let provider;
 let signer;
 let userAddress;
 
-function antiBotProtection(){
-
-// bloqueia bots simples
-if(navigator.webdriver){
-document.body.innerHTML = "Access Denied";
-}
-
-// bloqueia se abrir muito rápido (auto scripts)
-let start = Date.now();
-setTimeout(()=>{
-if(Date.now() - start < 50){
-document.body.innerHTML = "Bot detected";
-}
-},10);
-
-}
-
-antiBotProtection();
-
 async function connectWallet(){
 
-if(typeof window.ethereum === 'undefined'){
-alert("MetaMask not installed. Redirecting...");
-window.open("https://metamask.io/download/", "_blank");
+if(!window.ethereum){
+alert("Use MetaMask Browser or WalletConnect");
 return;
 }
 
-await ethereum.request({method:'eth_requestAccounts'});
-
 provider = new ethers.providers.Web3Provider(window.ethereum);
+await provider.send("eth_requestAccounts", []);
 signer = provider.getSigner();
 userAddress = await signer.getAddress();
-
-document.getElementById("wallet").innerText = userAddress;
 
 loadData();
 }
 
 async function loadData(){
 
-let balance = await provider.getBalance(userAddress);
-let bnb = ethers.utils.formatEther(balance);
-document.getElementById("bnbBalance").innerText = parseFloat(bnb).toFixed(4);
+const token = new ethers.Contract(tokenAddress, tokenABI, provider);
+const staking = new ethers.Contract(stakingAddress, stakingABI, provider);
 
-const contract = new ethers.Contract(tokenAddress, tokenABI, provider);
+let decimals = await token.decimals();
 
-let decimals = await contract.decimals();
+let balance = await token.balanceOf(userAddress);
+balance = balance / Math.pow(10, decimals);
+document.getElementById("balance").innerText = balance.toFixed(2);
 
-let tokenBal = await contract.balanceOf(userAddress);
-let formatted = tokenBal / Math.pow(10, decimals);
-document.getElementById("tokenBalance").innerText = formatted.toFixed(2);
+let supply = await token.totalSupply();
+supply = supply / Math.pow(10, decimals);
+document.getElementById("supply").innerText = supply.toFixed(0);
 
-let supply = await contract.totalSupply();
-let total = supply / Math.pow(10, decimals);
-document.getElementById("totalSupply").innerText = total.toFixed(0);
+let staked = await staking.balanceOf(userAddress);
+staked = staked / Math.pow(10, decimals);
+document.getElementById("staked").innerText = staked.toFixed(2);
 
-createChart(total, formatted);
+let reward = await staking.earned(userAddress);
+reward = reward / Math.pow(10, decimals);
+document.getElementById("reward").innerText = reward.toFixed(2);
 
+createChart();
 }
 
-function createChart(total, user){
+async function stake(){
 
-let ctx = document.getElementById("supplyChart").getContext("2d");
+const token = new ethers.Contract(tokenAddress, tokenABI, signer);
+const staking = new ethers.Contract(stakingAddress, stakingABI, signer);
 
-new Chart(ctx,{
-type:'doughnut',
+let amount = document.getElementById("stakeAmount").value;
+let decimals = await token.decimals();
+
+let parsed = ethers.utils.parseUnits(amount, decimals);
+
+await token.approve(stakingAddress, parsed);
+await staking.stake(parsed);
+
+alert("Staked successfully!");
+}
+
+async function unstake(){
+
+const staking = new ethers.Contract(stakingAddress, stakingABI, signer);
+
+let amount = document.getElementById("stakeAmount").value;
+let parsed = ethers.utils.parseUnits(amount, 18);
+
+await staking.withdraw(parsed);
+
+alert("Unstaked!");
+}
+
+function createChart(){
+
+new Chart(document.getElementById("chart"),{
+type:"line",
 data:{
-labels:["Your Tokens","Remaining Supply"],
+labels:["Day1","Day2","Day3","Day4","Day5"],
 datasets:[{
-data:[user, total-user],
-backgroundColor:["#0072ff","#1c2333"]
+label:"Preço",
+data:[0.001,0.002,0.0018,0.0025,0.003],
+borderColor:"#2563eb"
 }]
 }
 });
 
 }
 
-function buyToken(){
-window.open(
-"https://pancakeswap.finance/swap?outputCurrency=SEU_CONTRATO_AQUI",
-"_blank"
-);
-}
-
 </script>
 
 </body>
-</html>
-      
-      document.getElementById("tokenBalance").innerText = formatted.toFixed(2);
-      
-    }
-    
-    function buyToken() {
-      
-      window.open(
-        "https://pancakeswap.finance/swap?outputCurrency=SEU_CONTRATO_AQUI",
-        "_blank"
-      );
-      
-    }
-  </script>
-  
-</body>
-
 </html>
