@@ -1,19 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apex Token</title>
 
+<!-- Ethers -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- WalletConnect -->
+<script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+
+<!-- Web3Modal -->
+<script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
 
 <style>
 body{
+margin:0;
+font-family:Arial;
 background:#0b0f19;
 color:white;
-font-family:Arial;
-margin:0;
 }
 
 header{
@@ -34,22 +40,25 @@ cursor:pointer;
 font-weight:bold;
 }
 
+button:hover{
+background:#1d4ed8;
+}
+
 .container{
 padding:20px;
 }
 
-.stats{
-display:flex;
-flex-wrap:wrap;
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:20px;
 }
 
 .card{
-flex:1;
-min-width:200px;
 background:#1f2937;
 padding:20px;
 border-radius:12px;
+text-align:center;
 }
 
 .staking{
@@ -57,14 +66,15 @@ margin-top:30px;
 background:#1f2937;
 padding:20px;
 border-radius:12px;
+text-align:center;
 }
 
 input{
 padding:10px;
-width:200px;
 border-radius:6px;
 border:none;
-margin-right:10px;
+margin:10px;
+width:200px;
 }
 </style>
 </head>
@@ -77,33 +87,169 @@ margin-right:10px;
 
 <div class="container">
 
-<div class="stats">
+<div class="grid">
+
 <div class="card">
-<h4>Preço</h4>
-<p id="price">$0.0000</p>
+<h4>Wallet</h4>
+<p id="wallet">Not connected</p>
 </div>
 
 <div class="card">
-<h4>Market Cap</h4>
-<p id="marketcap">$0</p>
+<h4>BNB Balance</h4>
+<p id="bnb">0</p>
 </div>
 
 <div class="card">
-<h4>Total Supply</h4>
-<p id="supply">0</p>
+<h4>APEX Balance</h4>
+<p id="apex">0</p>
 </div>
 
-<div class="card">
-<h4>Seu Saldo</h4>
-<p id="balance">0</p>
 </div>
-</div>
-
-<canvas id="chart" height="100"></canvas>
 
 <div class="staking">
 <h3>🔥 Staking</h3>
-<p>APR: 20%</p>
+
+<input type="number" id="stakeAmount" placeholder="Quantidade APEX">
+
+<br>
+
+<button onclick="stake()">Stake</button>
+<button onclick="unstake()">Unstake</button>
+
+<p>Staked: <span id="staked">0</span></p>
+<p>Reward: <span id="reward">0</span></p>
+
+</div>
+
+</div>
+
+<script>
+
+const tokenAddress = "SEU_CONTRATO_TOKEN";
+const stakingAddress = "SEU_CONTRATO_STAKING";
+
+const tokenABI = [
+"function balanceOf(address owner) view returns (uint256)",
+"function decimals() view returns (uint8)",
+"function approve(address spender, uint256 amount) returns (bool)"
+];
+
+const stakingABI = [
+"function stake(uint256 amount)",
+"function withdraw(uint256 amount)",
+"function earned(address account) view returns(uint256)",
+"function balanceOf(address account) view returns(uint256)"
+];
+
+let web3Modal;
+let provider;
+let signer;
+let userAddress;
+
+window.addEventListener("load", async () => {
+
+const providerOptions = {
+walletconnect: {
+package: window.WalletConnectProvider.default,
+options: {
+rpc: {
+56: "https://bsc-dataseed.binance.org/"
+},
+chainId: 56
+}
+}
+};
+
+web3Modal = new window.Web3Modal.default({
+cacheProvider: false,
+providerOptions
+});
+
+});
+
+async function connectWallet(){
+
+const instance = await web3Modal.connect();
+
+provider = new ethers.providers.Web3Provider(instance);
+signer = provider.getSigner();
+userAddress = await signer.getAddress();
+
+document.getElementById("wallet").innerText = userAddress;
+
+checkNetwork();
+loadData();
+
+}
+
+async function checkNetwork(){
+
+const network = await provider.getNetwork();
+
+if(network.chainId !== 56){
+alert("Switch to BNB Smart Chain (BSC)");
+}
+
+}
+
+async function loadData(){
+
+const token = new ethers.Contract(tokenAddress, tokenABI, provider);
+const staking = new ethers.Contract(stakingAddress, stakingABI, provider);
+
+let decimals = await token.decimals();
+
+let bnb = await provider.getBalance(userAddress);
+bnb = ethers.utils.formatEther(bnb);
+document.getElementById("bnb").innerText = parseFloat(bnb).toFixed(4);
+
+let apex = await token.balanceOf(userAddress);
+apex = apex / Math.pow(10, decimals);
+document.getElementById("apex").innerText = apex.toFixed(2);
+
+let staked = await staking.balanceOf(userAddress);
+staked = staked / Math.pow(10, decimals);
+document.getElementById("staked").innerText = staked.toFixed(2);
+
+let reward = await staking.earned(userAddress);
+reward = reward / Math.pow(10, decimals);
+document.getElementById("reward").innerText = reward.toFixed(2);
+
+}
+
+async function stake(){
+
+const token = new ethers.Contract(tokenAddress, tokenABI, signer);
+const staking = new ethers.Contract(stakingAddress, stakingABI, signer);
+
+let decimals = await token.decimals();
+let amount = document.getElementById("stakeAmount").value;
+let parsed = ethers.utils.parseUnits(amount, decimals);
+
+await token.approve(stakingAddress, parsed);
+await staking.stake(parsed);
+
+alert("Stake realizado!");
+
+}
+
+async function unstake(){
+
+const staking = new ethers.Contract(stakingAddress, stakingABI, signer);
+
+let amount = document.getElementById("stakeAmount").value;
+let parsed = ethers.utils.parseUnits(amount, 18);
+
+await staking.withdraw(parsed);
+
+alert("Unstake realizado!");
+
+}
+
+</script>
+
+</body>
+</html>
 
 <input type="number" id="stakeAmount" placeholder="Quantidade APEX">
 <button onclick="stake()">Stake</button>
