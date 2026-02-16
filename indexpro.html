@@ -626,4 +626,788 @@
         <div class="side-head">
           <div style="display:flex;flex-direction:column;gap:6px">
             <div style="font-family:Orbitron,sans-serif;letter-spacing:.7px;font-weight:900">APEX HOLDER PANEL</div>
-            <div class="hint">Connect Wallet universal (Injec
+              <div class="hint">Connect Wallet universal (Injected). Se não tiver carteira, use um navegador com carteira.</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div id="walletNotConnected">
+          <button class="btn primary" style="width:100%" onclick="connectWallet()">CONNECT WALLET</button>
+          <div class="status">
+            Se aparecer “Install MetaMask”, não é bug: seu navegador não tem provider.
+            Use <b>TrustWallet</b>, <b>MetaMask</b> ou <b>OKX Wallet</b> no navegador.
+          </div>
+        </div>
+
+        <div id="walletConnected" style="display:none">
+          <div class="wallet-chip">
+            <div class="avatar" id="avatar"></div>
+            <div class="wallet-meta">
+              <b id="addrShort">—</b>
+              <span id="netName">Network: —</span>
+            </div>
+            <div class="drop">
+              <button class="dropbtn" onclick="toggleDrop(event)">⋯</button>
+              <div class="dropmenu" id="dropmenu">
+                <button onclick="disconnect()">Disconnect</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="badges" id="badges"></div>
+
+          <div class="grid2">
+            <div class="mini">
+              <small>BNB Balance</small>
+              <b id="bnbBal">—</b>
+            </div>
+            <div class="mini">
+              <small>APEX Balance</small>
+              <b id="apexBal">—</b>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="mini">
+              <small>APEX/USDT (Pancake)</small>
+              <b id="apexPrice">—</b>
+            </div>
+            <div class="mini">
+              <small>Reward Pool</small>
+              <b id="poolLeft">—</b>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="mini">
+              <small>Next Claim</small>
+              <b id="countdown">—</b>
+            </div>
+            <div class="mini">
+              <small>Streak</small>
+              <b><span id="streak">0</span> days</b>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn primary small" onclick="claimReward()">🔥 CLAIM</button>
+            <button class="btn small" onclick="refreshAll()">↻ REFRESH</button>
+          </div>
+
+          <div class="status" id="rewardStatus">Status: pronto.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glow-line"></div>
+  </div>
+
+  <!-- Tokenomics -->
+  <div class="wrap">
+    <section id="tokenomics">
+      <div class="section-title">TOKENOMICS <span class="bar"></span></div>
+
+      <div class="cards">
+        <div class="info-card">
+          <h4>NAME</h4>
+          <b>Apex Token</b>
+          <p>Gaming utility token powering rewards, staking and ecosystem growth.</p>
+        </div>
+        <div class="info-card">
+          <h4>SYMBOL</h4>
+          <b>APT</b>
+          <p>Default ticker used across the UI and PancakeSwap buy link.</p>
+        </div>
+        <div class="info-card">
+          <h4>TOTAL SUPPLY</h4>
+          <b id="totalSupply">—</b>
+          <p>Total supply pulled on-chain from the token contract.</p>
+        </div>
+      </div>
+
+      <div class="two" style="margin-top:14px">
+        <div class="big-card">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:42px;height:42px;border-radius:16px;background:rgba(255,77,77,.10);border:1px solid rgba(255,77,77,.28);display:grid;place-items:center">🔥</div>
+            <div>
+              <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900">BURN MECHANISM</div>
+              <div class="hint">Every transaction burns a percentage (if enabled in token). Supply decreases, value potential increases.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="big-card">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:42px;height:42px;border-radius:16px;background:rgba(44,107,255,.12);border:1px solid rgba(44,107,255,.32);display:grid;place-items:center">📈</div>
+            <div>
+              <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900">MARKETING TAX</div>
+              <div class="hint">Fee allocated to growth & partnerships (if enabled in token).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two" style="margin-top:14px">
+        <div class="big-card">
+          <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900;margin-bottom:10px">FEE DISTRIBUTION ANALYSIS</div>
+          <canvas id="feeChart" height="240"></canvas>
+          <div class="hint" style="margin-top:10px">
+            Este gráfico é visual (vibe CoinMarketCap). Se você quiser, dá para puxar dados reais do contrato (tax/burn) quando existir ABI.
+          </div>
+        </div>
+
+        <div class="big-card">
+          <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900;margin-bottom:10px">SUPPLY CHART</div>
+          <canvas id="supplyChart" height="240"></canvas>
+          <div class="hint" style="margin-top:10px">
+            Supply puxado do contrato APEX (on-chain). Se o token tiver burn real, aqui você enxerga a tendência.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="glow-line"></div>
+
+    <!-- Roadmap -->
+    <section id="roadmap">
+      <div class="section-title">ROADMAP <span class="bar"></span></div>
+
+      <div class="two">
+        <div class="phase">
+          <div class="pill green">COMPLETED</div>
+          <h3><span>Phase 1</span><br/>Genesis</h3>
+          <ul>
+            <li>Contract Deployment</li>
+            <li>Initial Supply Audit</li>
+            <li>Community Launch</li>
+            <li>Whitepaper v1</li>
+          </ul>
+        </div>
+
+        <div class="phase">
+          <div class="pill blue">ONGOING</div>
+          <h3><span>Phase 2</span><br/>Expansion</h3>
+          <ul>
+            <li>CoinGecko/CMC Listing</li>
+            <li>Influencer Partnerships</li>
+            <li>Marketing Campaign Launch</li>
+            <li>First Game Integration</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="two" style="margin-top:14px">
+        <div class="phase">
+          <div class="pill">UPCOMING</div>
+          <h3><span>Phase 3</span><br/>Apex Ecosystem</h3>
+          <ul>
+            <li>Apex NFT Marketplace</li>
+            <li>Staking Dashboard</li>
+            <li>Mobile Game Beta</li>
+            <li>Strategic DAO Setup</li>
+          </ul>
+        </div>
+
+        <div class="phase">
+          <div class="pill">UPCOMING</div>
+          <h3><span>Phase 4</span><br/>Universal Dominance</h3>
+          <ul>
+            <li>Cross-chain Bridge</li>
+            <li>Major Tier 1 CEX Listing</li>
+            <li>Apex Global eSports Tournament</li>
+            <li>Full Metaverse Integration</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="glow-line"></div>
+
+    <!-- Advisor -->
+    <section id="advisor">
+      <div class="section-title">APEX ADVISOR AI <span class="bar"></span></div>
+
+      <div class="big-card">
+        <div style="border-radius:22px;overflow:hidden;border:1px solid rgba(120,160,255,.14)">
+          <div style="padding:16px;background:linear-gradient(135deg, rgba(44,107,255,.95), rgba(0,224,255,.10));display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:44px;height:44px;border-radius:18px;background:rgba(255,255,255,.18);display:grid;place-items:center;border:1px solid rgba(255,255,255,.22)">🤖</div>
+              <div>
+                <div style="font-family:Orbitron,sans-serif;font-weight:900;letter-spacing:1px">APEX ADVISOR AI</div>
+                <div class="hint" style="color:rgba(255,255,255,.85)">Online & ready to strategize</div>
+              </div>
+            </div>
+            <div style="width:10px;height:10px;border-radius:99px;background:var(--green);box-shadow:0 0 0 6px rgba(22,199,132,.15)"></div>
+          </div>
+
+          <div style="padding:16px;min-height:140px;display:grid;place-items:center;color:rgba(234,242,255,.45)">
+            Ask me about APT tokenomics, utility, roadmap… (UI placeholder)
+          </div>
+
+          <div style="display:flex;gap:10px;padding:14px;border-top:1px solid rgba(120,160,255,.10);background:rgba(255,255,255,.02)">
+            <input id="aiInput" placeholder="Type your question..." style="flex:1;border-radius:16px;border:1px solid rgba(120,160,255,.14);background:rgba(255,255,255,.03);color:var(--txt);padding:14px 14px;outline:none"/>
+            <button class="btn primary" style="min-width:56px;padding:14px 12px" onclick="fakeAI()">➜</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="glow-line"></div>
+
+    <!-- Links / Community -->
+    <section id="links">
+      <div class="big-card">
+        <div class="footer-grid">
+          <div>
+            <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900;margin-bottom:12px">LINKS</div>
+            <div class="footer-list">
+              <a href="#links">Whitepaper</a>
+              <a href="#tokenomics">Governance</a>
+              <a href="#tokenomics">Audit</a>
+              <a id="pancakeLink" href="#" target="_blank" rel="noreferrer">PancakeSwap</a>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900;margin-bottom:12px">COMMUNITY</div>
+            <div class="footer-list">
+              <a href="#" onclick="toast('Coloque seu link do X/Twitter aqui')">Twitter (X)</a>
+              <a href="#" onclick="toast('Coloque seu link do Telegram aqui')">Telegram</a>
+              <a href="#" onclick="toast('Coloque seu link do Discord aqui')">Discord</a>
+              <a href="#" onclick="toast('Coloque seu link do Medium aqui')">Medium</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="copyright">
+          © <span id="year"></span> APEX GAMES TOKEN. ALL RIGHTS RESERVED. — PRIVACY POLICY — TERMS OF SERVICE
+        </div>
+      </div>
+    </section>
+
+    <div style="height:26px"></div>
+  </div>
+
+  <!-- Floating Dashboard Button -->
+  <button class="float" onclick="openDash()" aria-label="Open dashboard">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path d="M7 9h10a4 4 0 0 1 0 8H7a4 4 0 0 1 0-8z" stroke="white" stroke-opacity=".9" stroke-width="2" />
+      <path d="M9.2 12.5h2.2M10.3 11.4v2.2" stroke="white" stroke-opacity=".9" stroke-width="2" stroke-linecap="round"/>
+      <path d="M16 12.2h.01M17.5 13.7h.01" stroke="white" stroke-opacity=".9" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Dashboard Modal -->
+  <div class="dash-modal" id="dashModal" onclick="if(event.target.id==='dashModal') closeDash()">
+    <div class="dash-panel">
+      <div class="dash-head">
+        <h2>HOLDER DASHBOARD</h2>
+        <button class="xbtn" onclick="closeDash()">✕</button>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Left: Wallet / Reward -->
+        <div class="big-card">
+          <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900;margin-bottom:10px">Wallet + Rewards</div>
+
+          <div id="dashNotConnected">
+            <button class="btn primary" style="width:100%" onclick="connectWallet()">CONNECT WALLET</button>
+            <div class="status">Sem provider? Use TrustWallet/MetaMask/OKX no navegador.</div>
+          </div>
+
+          <div id="dashConnected" style="display:none">
+            <div class="wallet-chip">
+              <div class="avatar" id="avatar2"></div>
+              <div class="wallet-meta">
+                <b id="addrShort2">—</b>
+                <span id="netName2">Network: —</span>
+              </div>
+              <div class="drop">
+                <button class="dropbtn" onclick="toggleDrop(event)">⋯</button>
+                <div class="dropmenu" id="dropmenu2">
+                  <button onclick="disconnect()">Disconnect</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="badges" id="badges2" style="margin-top:10px"></div>
+
+            <div class="grid2">
+              <div class="mini"><small>BNB</small><b id="bnbBal2">—</b></div>
+              <div class="mini"><small>APEX</small><b id="apexBal2">—</b></div>
+            </div>
+
+            <div class="grid2">
+              <div class="mini"><small>APEX/USDT</small><b id="apexPrice2">—</b></div>
+              <div class="mini"><small>Reward Pool</small><b id="poolLeft2">—</b></div>
+            </div>
+
+            <div class="grid2">
+              <div class="mini"><small>Next Claim</small><b id="countdown2">—</b></div>
+              <div class="mini"><small>Streak</small><b><span id="streak2">0</span> days</b></div>
+            </div>
+
+            <div class="action-row">
+              <button class="btn primary small" onclick="claimReward()">🔥 CLAIM</button>
+              <button class="btn small" onclick="refreshAll()">↻ REFRESH</button>
+            </div>
+
+            <div class="status" id="rewardStatus2">Status: pronto.</div>
+          </div>
+        </div>
+
+        <!-- Right: Staking (UI pronta) -->
+        <div class="big-card">
+          <div style="font-family:Orbitron,sans-serif;letter-spacing:1px;font-weight:900;margin-bottom:10px">Staking (integrado)</div>
+          <div class="hint">
+            Aqui é o painel de staking integrado no site. Para funcionar on-chain, precisamos do
+            <b>endereço do contrato de staking</b> + ABI (stake/unstake/claim/earned).
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="grid2">
+            <div class="mini"><small>Staked</small><b id="stakedUi">0.00</b></div>
+            <div class="mini"><small>Earned</small><b id="earnedUi">0.00</b></div>
+          </div>
+
+          <div class="grid2" style="margin-top:12px">
+            <input id="stakeAmount" placeholder="Amount APEX" style="width:100%;border-radius:16px;border:1px solid rgba(120,160,255,.14);background:rgba(255,255,255,.03);color:var(--txt);padding:14px 14px;outline:none"/>
+            <button class="btn small" onclick="toast('Staking: falta configurar contrato')">MAX</button>
+          </div>
+
+          <div class="action-row">
+            <button class="btn small" onclick="toast('Staking: falta configurar contrato')">APPROVE</button>
+            <button class="btn primary small" onclick="toast('Staking: falta configurar contrato')">STAKE</button>
+          </div>
+
+          <div class="action-row">
+            <button class="btn small" onclick="toast('Staking: falta configurar contrato')">UNSTAKE</button>
+            <button class="btn small" onclick="toast('Staking: falta configurar contrato')">CLAIM EARNED</button>
+          </div>
+
+          <div class="status">
+            ✅ Quando você me passar o contrato de staking, eu ligo tudo de verdade (approve, stake, unstake, earned).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script type="module">
+  import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.14.0/+esm";
+
+  // =========================
+  // CONFIG (seus contratos)
+  // =========================
+  const TOKEN = "0xB3a78c3f55Fc653992169F77cb10878D2cF1684f";          // APEX Token
+  const REWARD = "0xA293A267c35651dC770B91499bBFf3c5F136dFA5";         // Reward contract
+
+  // PancakeSwap Router (BSC Mainnet)
+  const PANCAKE_ROUTER = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
+  const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+  const USDT = "0x55d398326f99059fF775485246999027B3197955";
+
+  // Buy link direto PancakeSwap (token -> swap)
+  const PANCAKE_BUY = `https://pancakeswap.finance/swap?outputCurrency=${TOKEN}`;
+
+  // ABIs mínimas
+  const tokenABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function totalSupply() view returns (uint256)",
+    "function decimals() view returns (uint8)"
+  ];
+
+  // Reward: pode ou não ter lastClaim dependendo da versão; tentamos ler e se falhar, faz fallback
+  const rewardABI = [
+    "function claim()",
+    "function lastClaim(address) view returns (uint256)"
+  ];
+
+  // Pancake Router: getAmountsOut
+  const routerABI = [
+    "function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)"
+  ];
+
+  // =========================
+  // STATE
+  // =========================
+  let provider, signer, addr;
+  let tokenRead, tokenWrite, rewardWrite, routerRead;
+  let tokenDecimals = 18;
+
+  // =========================
+  // UI helpers
+  // =========================
+  const el = (id)=>document.getElementById(id);
+  const toastEl = el("toast");
+
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2200);
+  }
+  window.toast = toast;
+
+  function shortAddr(a){
+    return a ? (a.slice(0,6)+"..."+a.slice(-4)) : "—";
+  }
+  function setBadges(apexBalance){
+    const badges = [];
+    const hasApex = apexBalance > 0;
+
+    if(hasApex) badges.push(`<span class="badge ok">HOLDER</span>`);
+    if(apexBalance >= 100000) badges.push(`<span class="badge warn">WHALE</span>`);
+
+    // Tier (mesma lógica que você queria)
+    let tier = "BRONZE";
+    if(apexBalance >= 100000) tier = "WHALE";
+    else if(apexBalance >= 10000) tier = "GOLD";
+    else if(apexBalance >= 1000) tier = "SILVER";
+    badges.push(`<span class="badge blue">TIER: ${tier}</span>`);
+
+    el("badges").innerHTML = badges.join("");
+    el("badges2").innerHTML = badges.join("");
+  }
+
+  function avatarColor(address){
+    const hex = address.replace("0x","").slice(0,6);
+    return `#${hex}`;
+  }
+  function paintAvatar(){
+    const c = avatarColor(addr);
+    el("avatar").style.background = c;
+    el("avatar2").style.background = c;
+  }
+
+  function toggleDrawer(open){
+    el("drawer").classList.toggle("open", !!open);
+  }
+  window.toggleDrawer = toggleDrawer;
+
+  function toggleDrop(ev){
+    ev?.stopPropagation?.();
+    const m1 = el("dropmenu");
+    const m2 = el("dropmenu2");
+    const open = (m1.style.display === "block");
+    m1.style.display = open ? "none" : "block";
+    m2.style.display = open ? "none" : "block";
+    document.addEventListener("click", ()=>{ m1.style.display="none"; m2.style.display="none"; }, {once:true});
+  }
+  window.toggleDrop = toggleDrop;
+
+  function openDash(){ el("dashModal").classList.add("open"); }
+  function closeDash(){ el("dashModal").classList.remove("open"); }
+  window.openDash = openDash;
+  window.closeDash = closeDash;
+
+  function disconnect(){
+    // “disconnect” universal no frontend (limpa state e recarrega)
+    localStorage.removeItem("apex_last_claim_ts");
+    toast("Disconnected");
+    setTimeout(()=>location.reload(), 450);
+  }
+  window.disconnect = disconnect;
+
+  // Copy contract
+  window.copyToken = async function(){
+    try{
+      await navigator.clipboard.writeText(TOKEN);
+      toast("Contract copied!");
+    }catch{
+      toast("Copy failed");
+    }
+  }
+
+  // Advisor UI dummy
+  window.fakeAI = function(){
+    const v = el("aiInput").value.trim();
+    if(!v) return toast("Type something...");
+    el("aiInput").value = "";
+    toast("Advisor: (UI) integrado ✅");
+  }
+
+  // =========================
+  // Charts (fee + supply)
+  // =========================
+  let feeChart, supplyChart;
+
+  function renderFeeChart(){
+    const ctx = el("feeChart");
+    feeChart?.destroy();
+    feeChart = new Chart(ctx, {
+      type:"doughnut",
+      data:{
+        labels:["Burn per Trans.", "Liquidity/Rewards", "Marketing Fee"],
+        datasets:[{
+          data:[0.99, 1.0, 0.5] // visual, ajuste se quiser
+        }]
+      },
+      options:{
+        plugins:{legend:{labels:{color:"rgba(234,242,255,.75)"}}},
+        cutout:"72%"
+      }
+    });
+  }
+
+  function renderSupplyChart(totalSupply){
+    const ctx = el("supplyChart");
+    supplyChart?.destroy();
+    // Visual: “launch vs now” (igual vibe de gráfico simples)
+    supplyChart = new Chart(ctx, {
+      type:"line",
+      data:{
+        labels:["Launch","Now"],
+        datasets:[{
+          label:"Total Supply",
+          data:[totalSupply, totalSupply],
+          tension:.25,
+          borderWidth:2
+        }]
+      },
+      options:{
+        plugins:{legend:{labels:{color:"rgba(234,242,255,.75)"}}},
+        scales:{
+          x:{ticks:{color:"rgba(234,242,255,.65)"}, grid:{color:"rgba(120,160,255,.08)"}},
+          y:{ticks:{color:"rgba(234,242,255,.65)"}, grid:{color:"rgba(120,160,255,.08)"}}
+        }
+      }
+    });
+  }
+
+  // =========================
+  // Wallet + On-chain
+  // =========================
+  async function connectWallet(){
+    if(!window.ethereum){
+      toast("Sem carteira no navegador. Use TrustWallet/MetaMask/OKX.");
+      return;
+    }
+
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = await provider.getSigner();
+    addr = await signer.getAddress();
+
+    tokenRead = new ethers.Contract(TOKEN, tokenABI, provider);
+    tokenWrite = new ethers.Contract(TOKEN, tokenABI, signer);
+    rewardWrite = new ethers.Contract(REWARD, rewardABI, signer);
+    routerRead = new ethers.Contract(PANCAKE_ROUTER, routerABI, provider);
+
+    // decimals
+    try{ tokenDecimals = await tokenRead.decimals(); }catch{ tokenDecimals = 18; }
+
+    // UI show
+    el("walletNotConnected").style.display="none";
+    el("walletConnected").style.display="block";
+    el("dashNotConnected").style.display="none";
+    el("dashConnected").style.display="block";
+
+    paintAvatar();
+    el("addrShort").textContent = shortAddr(addr);
+    el("addrShort2").textContent = shortAddr(addr);
+
+    // network
+    const net = await provider.getNetwork();
+    const netLabel = net?.chainId === 56n ? "BSC Mainnet" : (net?.chainId === 97n ? "BSC Testnet" : `Chain ${net?.chainId}`);
+    el("netName").textContent = `Network: ${netLabel}`;
+    el("netName2").textContent = `Network: ${netLabel}`;
+
+    toast("Wallet connected ✅");
+    await refreshAll();
+  }
+  window.connectWallet = connectWallet;
+
+  async function refreshAll(){
+    if(!provider || !addr) return;
+
+    // balances
+    const bnb = await provider.getBalance(addr);
+    const bnbFmt = Number(ethers.formatEther(bnb)).toFixed(4);
+
+    const apexRaw = await tokenRead.balanceOf(addr);
+    const apexFmtNum = Number(ethers.formatUnits(apexRaw, tokenDecimals));
+    const apexFmt = apexFmtNum.toFixed(2);
+
+    el("bnbBal").textContent = bnbFmt;
+    el("bnbBal2").textContent = bnbFmt;
+    el("apexBal").textContent = apexFmt;
+    el("apexBal2").textContent = apexFmt;
+
+    setBadges(apexFmtNum);
+
+    // pool
+    const poolRaw = await tokenRead.balanceOf(REWARD);
+    const poolNum = Number(ethers.formatUnits(poolRaw, tokenDecimals));
+    const poolFmt = poolNum.toLocaleString(undefined, {maximumFractionDigits:2});
+
+    el("poolLeft").textContent = poolFmt;
+    el("poolLeft2").textContent = poolFmt;
+
+    // price via Pancake router
+    await loadPrice();
+
+    // total supply
+    const tsRaw = await tokenRead.totalSupply();
+    const tsNum = Number(ethers.formatUnits(tsRaw, tokenDecimals));
+    el("totalSupply").textContent = tsNum.toLocaleString(undefined, {maximumFractionDigits:0});
+
+    // charts
+    renderFeeChart();
+    renderSupplyChart(tsNum);
+
+    // countdown
+    await startCountdown();
+
+    // streak display
+    updateStreakUI();
+
+    // links
+    el("btnBuy").href = PANCAKE_BUY;
+    el("pancakeLink").href = PANCAKE_BUY;
+
+    // contract display
+    el("tokenAddrText").textContent = TOKEN;
+  }
+  window.refreshAll = refreshAll;
+
+  async function loadPrice(){
+    // Tentamos: 1 APEX -> USDT via path [APEX, WBNB, USDT]
+    // Se não houver liquidez, vai falhar -> mostramos —
+    try{
+      const amountIn = ethers.parseUnits("1", tokenDecimals);
+      const path = [TOKEN, WBNB, USDT];
+      const out = await routerRead.getAmountsOut(amountIn, path);
+      const usdtOut = Number(ethers.formatUnits(out[out.length-1], 18));
+      const p = usdtOut.toFixed(6);
+
+      el("apexPrice").textContent = p;
+      el("apexPrice2").textContent = p;
+    }catch(e){
+      el("apexPrice").textContent = "—";
+      el("apexPrice2").textContent = "—";
+    }
+  }
+
+  // Countdown + lastClaim
+  let countdownTimer = null;
+
+  async function startCountdown(){
+    // limpa timer anterior
+    if(countdownTimer) clearInterval(countdownTimer);
+
+    let last = 0;
+    try{
+      last = Number(await rewardWrite.lastClaim(addr));
+    }catch{
+      // se ABI não tiver lastClaim, fallback local
+      last = Number(localStorage.getItem("apex_last_claim_ts") || 0);
+    }
+
+    const cooldown = 24 * 60 * 60;
+    const target = last + cooldown;
+
+    const tick = ()=>{
+      const now = Math.floor(Date.now()/1000);
+      const diff = target - now;
+
+      if(diff <= 0){
+        el("countdown").textContent = "Ready!";
+        el("countdown2").textContent = "Ready!";
+        return;
+      }
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      const txt = `${h}h ${m}m ${s}s`;
+      el("countdown").textContent = txt;
+      el("countdown2").textContent = txt;
+    };
+
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+  }
+
+  // Claim Reward (on-chain)
+  async function claimReward(){
+    if(!rewardWrite) return toast("Connect wallet first");
+    el("rewardStatus").innerHTML = `Status: <strong>confirmando...</strong>`;
+    el("rewardStatus2").innerHTML = `Status: <strong>confirmando...</strong>`;
+
+    try{
+      const tx = await rewardWrite.claim();
+      el("rewardStatus").innerHTML = `Status: <strong>aguarde mineração</strong>…`;
+      el("rewardStatus2").innerHTML = `Status: <strong>aguarde mineração</strong>…`;
+      await tx.wait();
+
+      // salva fallback de last claim pro streak (caso lastClaim falhe)
+      const now = Math.floor(Date.now()/1000);
+      localStorage.setItem("apex_last_claim_ts", String(now));
+
+      // streak
+      applyStreakOnClaim(now);
+
+      el("rewardStatus").innerHTML = `Status: <strong>Reward claimed ✅</strong>`;
+      el("rewardStatus2").innerHTML = `Status: <strong>Reward claimed ✅</strong>`;
+      toast("Claim feito ✅");
+
+      await refreshAll();
+    }catch(err){
+      el("rewardStatus").innerHTML = `Status: <strong>Wait 24h / pool / rede</strong>`;
+      el("rewardStatus2").innerHTML = `Status: <strong>Wait 24h / pool / rede</strong>`;
+      toast("Falhou: espere 24h ou verifique rede/pool");
+    }
+  }
+  window.claimReward = claimReward;
+
+  // Streak logic (visual, mas consistente)
+  function applyStreakOnClaim(nowTs){
+    const lastDay = Number(localStorage.getItem("apex_streak_last_day") || 0);
+    const streak = Number(localStorage.getItem("apex_streak") || 0);
+
+    const today = Math.floor(nowTs / 86400); // dias desde epoch
+
+    let newStreak = streak;
+
+    if(lastDay === 0){
+      newStreak = 1;
+    }else{
+      const diffDays = today - lastDay;
+      if(diffDays === 1) newStreak = streak + 1;    // sequência
+      else if(diffDays === 0) newStreak = streak;   // já contou hoje
+      else newStreak = 1;                           // quebrou
+    }
+
+    localStorage.setItem("apex_streak", String(newStreak));
+    localStorage.setItem("apex_streak_last_day", String(today));
+    updateStreakUI();
+  }
+
+  function updateStreakUI(){
+    const s = Number(localStorage.getItem("apex_streak") || 0);
+    el("streak").textContent = String(s);
+    el("streak2").textContent = String(s);
+  }
+
+  // =========================
+  // Boot
+  // =========================
+  el("year").textContent = String(new Date().getFullYear());
+  el("tokenAddrText").textContent = TOKEN;
+  el("btnBuy").href = PANCAKE_BUY;
+  el("pancakeLink").href = PANCAKE_BUY;
+
+  // Fecha dropdown se clicar fora
+  document.addEventListener("click", ()=>{
+    const m1 = el("dropmenu"); const m2 = el("dropmenu2");
+    if(m1) m1.style.display="none";
+    if(m2) m2.style.display="none";
+  });
+</script>
+
+</body>
+</html>
